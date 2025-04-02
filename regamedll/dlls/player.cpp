@@ -2482,8 +2482,21 @@ void EXT_FUNC CBasePlayer::__API_HOOK(Killed)(entvars_t *pevAttacker, int iGib)
 		MESSAGE_BEGIN(MSG_ONE, gmsgADStop, nullptr, pev);
 		MESSAGE_END();
 
-		UTIL_ScreenFade(this, Vector(0, 0, 0), 0.8f, flDyingDuration, 255, (FFADE_OUT));
+		float fadeTime = m_bHeadshotKilled ? 0.4f : 1.0f;
+		float flDyingHold = GetSequenceDuration() + fadeTime;
 
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+    	{
+        	CBasePlayer* pObserver = UTIL_PlayerByIndex(i);
+
+			if (!UTIL_IsValidPlayer(pObserver))
+        		continue;
+
+			if (pObserver == this || pObserver->IsObservingPlayer(this))
+        	{
+                UTIL_ScreenFade(pObserver, Vector(0, 0, 0), fadeTime, flDyingHold, 255, (FFADE_OUT));
+        	}
+    	}
 		break;
 	}
 	}
